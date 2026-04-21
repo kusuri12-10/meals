@@ -6,7 +6,7 @@ on:
   workflow_dispatch:
 
 jobs:
-  run-monitor:
+  fetch-meal:
     runs-on: ubuntu-latest
     permissions:
       contents: write # 파일 수정을 위한 권한
