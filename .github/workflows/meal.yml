@@ -60,5 +60,4 @@ jobs:
           content: "🍱 식단 데이터가 업데이트되어 repository에 반영되었습니다!"
           title: "Meals Bot 알림"
           description: |
-            **meals repo**: ${{ github.repository }}
             **updated month**: ${{ steps.git_commit.outputs.content }}
