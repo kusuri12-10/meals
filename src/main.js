@@ -1,3 +1,4 @@
+import '../index.css'
 import {
   TODAY, currentDate, isLightMode, isCalendarOpen,
   setCurrentDate, setIsLightMode, setIsCalendarOpen, setCalendarMonth,
