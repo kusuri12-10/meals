@@ -248,7 +248,7 @@ main {
   flex-direction: column;
   overflow: hidden;
   transition: border-color 0.2s, box-shadow 0.2s, transform 0.2s ease-out;
-  animation: cardIn 0.5s ease-out both;
+  animation: cardIn 0.25s ease-out both;
 }
 .meal-card:nth-child(1) { animation-delay: 0s; }
 .meal-card:nth-child(2) { animation-delay: 0.12s; }
