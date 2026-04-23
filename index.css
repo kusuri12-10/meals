@@ -347,12 +347,22 @@ main {
 footer {
   flex-shrink: 0;
   padding: 0.875rem 2rem;
-  text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
   color: rgb(var(--text-muted));
   font-size: 0.8rem;
   border-top: 1px solid rgb(var(--border-strong));
   transition: border-color 0.3s;
 }
+.footer-github {
+  color: rgb(var(--text-muted));
+  display: flex;
+  align-items: center;
+  transition: color 0.2s;
+}
+.footer-github:hover { color: rgb(var(--text)); }
 
 /* ── Fade animation ── */
 .meal-grid.fade-out { animation: fadeOut 0.15s ease forwards; }

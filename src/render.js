@@ -143,4 +143,5 @@ export function renderAll() {
   renderThemeBtn()
   renderDateNav()
   renderCalendar()
+  document.getElementById('footerGithub').innerHTML = ICONS.github
 }
