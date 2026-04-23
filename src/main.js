@@ -53,5 +53,6 @@ document.addEventListener('mousedown', e => {
   }
 })
 
+document.body.classList.add('light')
 renderAll()
 renderMeals()
