@@ -43,10 +43,7 @@ jobs:
             git commit -m "Update meal"
             git push
             echo "pushed=true" >> $GITHUB_OUTPUT
-
-            echo "content<<EOF" >> $GITHUB_OUTPUT
-            cat last.txt | head -n 1 >> $GITHUB_OUTPUT
-            echo "EOF" >> $GITHUB_OUTPUT
+            echo "content=$(cat last.txt | head -n 1)" >> $GITHUB_OUTPUT
           else
             echo "pushed=false" >> $GITHUB_OUTPUT
           fi
