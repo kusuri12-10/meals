@@ -90,26 +90,40 @@ def getMealInfos():
 
     try:
         response = requests.get(BASE_URL, params=params)
+        # 만약 API가 XML로 준다면 response.json()에서 에러가 날 수 있으므로 체크가 필요하지만,
+        # params에 "Type": "json"이 있으니 JSON 응답을 가정합니다.
         data = response.json()
-        
+
+        # 1. 성공 케이스 (mealServiceDietInfo 키가 존재함)
         if "mealServiceDietInfo" in data:
+            # 보조 키인 head에서 결과 코드 추출
             status_code = data["mealServiceDietInfo"][0]["head"][1]["RESULT"]["CODE"]
 
             if status_code == "INFO-000":
                 meal_json_path = f"meal/{next_month}.json"
                 save_json(meal_json_path, data)
                 save_file(LAST_DATE_FILE, next_month)
-                print(f"[{status_code}] {next_month} 저장 완료!")
+                print(f"✅ [SUCCESS] {next_month} 식단 데이터가 성공적으로 저장되었습니다.")
+                return # 성공했으므로 함수 종료
             else:
-                msg = data["mealServiceDietInfo"][0]["head"][1]["RESULT"]["MESSAGE"]
-                print(f"저장 실패: {status_code} ({msg})")
+                print(f"⚠️ [INFO] {next_month}: {status_code}")
+
+        # 2. 데이터 없음 또는 API 오류 케이스 (데이터 없이 RESULT만 옴)
+        elif "RESULT" in data:
+            code = data['RESULT']['CODE']
+            msg = data['RESULT']['MESSAGE']
+            
+            if code == "INFO-200":
+                # 이것은 에러가 아니라 '아직 식단이 안 올라온 상태'임
+                print(f"ℹ️ [SKIP] {next_month} 식단이 아직 등록되지 않았습니다. (다음 업데이트를 기다립니다)")
+            else:
+                print(f"❌ [API ERROR] {code}: {msg}")
+        
         else:
-            if "RESULT" in data:
-                print(f"API 오류: {data['RESULT']['CODE']} - {data['RESULT']['MESSAGE']}")
-            else:
-                print("알 수 없는 데이터 형식입니다.")
+            print("❓ [UNKNOWN] 알 수 없는 응답 구조입니다. API 로그를 확인하세요.")
+
     except Exception as e:
-        print(f"API 요청 중 오류 발생: {e}")
+        print(f"❗ [SYSTEM ERROR] 실행 중 오류 발생: {e}")
 
 if __name__ == "__main__":
     getMealInfos()
