@@ -37,3 +37,7 @@ python main.py
 ```
 
 실행 시 `last.txt`에 기록된 마지막 월을 기준으로 다음 달 데이터를 가져옵니다. `last.txt`가 없으면 현재 월을 기준으로 자동 복구합니다.
+
+## 서비스 피드백 남기기
+
+[google form](https://forms.gle/1KSBfJhxXfpVJZa96)
