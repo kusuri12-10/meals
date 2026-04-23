@@ -1,14 +1,113 @@
-function getMealsForDate(dateStr) {
-  const found = mockMealData.find(d => d.date === dateStr);
+// ── DATA ──────────────────────────────────────
+const mockMealData = [
+  {
+    date: '2026-04-20',
+    meals: [
+      { type: '조식', menu: ['현미밥', '소고기미역국', '계란말이', '배추김치', '우유'], calories: 580 },
+      { type: '중식', menu: ['기장밥', '돼지고기김치찌개', '고등어구이', '시금치나물', '깍두기'], calories: 720 },
+      { type: '석식', menu: ['참치마요덮밥', '유부장국', '떡볶이', '단무지', '요구르트'], calories: 650 },
+    ],
+  },
+  {
+    date: '2026-04-21',
+    meals: [
+      { type: '조식', menu: ['흑미밥', '콩나물국', '소시지야채볶음', '김구이', '배추김치'], calories: 610 },
+      { type: '중식', menu: ['차조밥', '육개장', '돈육간장불고기', '상추쌈/쌈장', '총각김치', '사과'], calories: 850 },
+      { type: '석식', menu: ['카레라이스', '미소된장국', '치킨까스/머스타드', '오복지무침', '배추김치'], calories: 780 },
+    ],
+  },
+  {
+    date: '2026-04-22',
+    meals: [
+      { type: '조식', menu: ['보리밥', '어묵국', '두부조림', '숙주나물', '배추김치'], calories: 550 },
+      { type: '중식', menu: ['혼합잡곡밥', '닭곰탕', '오징어볶음', '감자채볶음', '깍두기'], calories: 710 },
+      { type: '석식', menu: ['스파게티', '크림스프', '마늘빵', '수제피클', '과일샐러드'], calories: 820 },
+    ],
+  },
+  { date: '2026-04-25', meals: [] },
+  { date: '2026-04-26', meals: [] },
+];
+
+const transformMealData = (apiResponse) => {
+  const rows = apiResponse?.mealServiceDietInfo?.[1]?.row;
+  if (!rows) return [];
+
+  const groupedData = {};
+
+  rows.forEach((item) => {
+    const rawDate = item.MLSV_YMD;
+    // 날짜 포맷팅: 20260401 -> 2026-04-01
+    const formattedDate = `${rawDate.substring(0, 4)}-${rawDate.substring(4, 6)}-${rawDate.substring(6, 8)}`;
+
+    // 메뉴 정제: <br/> 태그로 나누고, 알레르기 정보(괄호와 숫자) 제거
+    const cleanMenu = item.DDISH_NM
+      .split('<br/>')
+      .map(menu => menu.replace(/\([0-9.]+\)/g, '').trim())
+      .filter(menu => menu !== "");
+
+    // 칼로리 정제: 숫자만 추출하여 반올림
+    const calories = Math.round(parseFloat(item.CAL_INFO.replace(/[^0-9.]/g, '')));
+
+    const mealEntry = {
+      type: item.MMEAL_SC_NM, // 조식, 중식, 석식
+      menu: cleanMenu,
+      calories: calories
+    };
+
+    // 해당 날짜가 이미 있으면 meals에 추가, 없으면 새로 생성
+    if (!groupedData[formattedDate]) {
+      groupedData[formattedDate] = {
+        date: formattedDate,
+        meals: []
+      };
+    }
+    groupedData[formattedDate].meals.push(mealEntry);
+  });
+
+  return Object.values(groupedData);
+};
+
+const loadMealData = async (dateStr) => {
+  try {
+    // 2026-04-22 -> 2026-04 추출
+    const yearMonth = dateStr.match(/^\d{4}-\d{2}/)[0];
+    
+    const response = await fetch(`./meal/${yearMonth}.json`);
+    
+    if (!response.ok) {
+      throw new Error(`파일을 찾을 수 없습니다: ./meal/${yearMonth}.json`);
+    }
+    
+    const data = await response.json();
+
+    if (data && data.mealServiceDietInfo) {
+        const finalData = transformMealData(data);
+        console.log(finalData)
+        return finalData;
+    }
+    
+    return [];
+  } catch (error) {
+    console.error('급식 로드 에러:', error);
+    return [];
+  }
+};
+
+async function getMealsForDate(dateStr) {
+  const mealData = await loadMealData(dateStr);
+  console.log(mealData);
+  const found = mealData.find(d => d.date === dateStr);
   return found ? found.meals : [];
 }
 
 // ── STATE ─────────────────────────────────────
-const TODAY = new Date(2026, 3, 21);
-let currentDate = new Date(2026, 3, 21);
+const TODAY = new Date();
+let currentDate = new Date(TODAY)
 let isLightMode = false;
 let isCalendarOpen = false;
 let calendarMonth = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1);
+
+getMealsForDate(toDateStr(currentDate))
 
 // ── SVG ICONS ─────────────────────────────────
 const ICONS = {
@@ -130,10 +229,10 @@ function renderCalendar() {
 }
 
 // ── RENDER: MEALS ─────────────────────────────
-function renderMeals() {
+async function renderMeals() {
   const grid = document.getElementById('mealGrid');
   const mealTypes = ['조식', '중식', '석식'];
-  const meals = getMealsForDate(toDateStr(currentDate));
+  const meals = await getMealsForDate(toDateStr(currentDate));
 
   grid.classList.add('fade-out');
   grid.addEventListener('animationend', () => {
@@ -193,21 +292,21 @@ document.getElementById('themeBtn').addEventListener('click', () => {
   document.body.classList.toggle('light', isLightMode);
   renderThemeBtn();
 });
-document.getElementById('prevBtn').addEventListener('click', () => {
+document.getElementById('prevBtn').addEventListener('click', async () => {
   const d = new Date(currentDate);
   d.setDate(d.getDate() - 1);
   currentDate = d;
   isCalendarOpen = false;
   renderAll(); renderMeals();
 });
-document.getElementById('nextBtn').addEventListener('click', () => {
+document.getElementById('nextBtn').addEventListener('click', async () => {
   const d = new Date(currentDate);
   d.setDate(d.getDate() + 1);
   currentDate = d;
   isCalendarOpen = false;
   renderAll(); renderMeals();
 });
-document.getElementById('todayBtn').addEventListener('click', () => {
+document.getElementById('todayBtn').addEventListener('click', async () => {
   currentDate = new Date(TODAY);
   isCalendarOpen = false;
   renderAll(); renderMeals();
