@@ -26,8 +26,8 @@ function transformMealData(apiResponse) {
 async function loadMealData(dateStr) {
   try {
     const yearMonth = dateStr.match(/^\d{4}-\d{2}/)[0]
-    const response = await fetch(`./meal/${yearMonth}.json`)
-    if (!response.ok) throw new Error(`파일을 찾을 수 없습니다: ./meal/${yearMonth}.json`)
+    const response = await fetch(`/meal/${yearMonth}.json`)
+    if (!response.ok) throw new Error(`파일을 찾을 수 없습니다: meal/${yearMonth}.json`)
     const data = await response.json()
     return data?.mealServiceDietInfo ? transformMealData(data) : []
   } catch (error) {
