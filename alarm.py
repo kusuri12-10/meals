@@ -68,7 +68,7 @@ def main():
         if row.get("MLSV_YMD") == TODAY and row.get("MMEAL_SC_NM") == meal_type
     ), None)
 
-    webhook_url = os.environ.get("DISCORD_WEBHOOK")
+    webhook_url = os.environ.get("ALARM_WEBHOOK")
     if webhook_url and target_meal:
         send_discord_message(webhook_url, target_meal)
     elif not target_meal:
