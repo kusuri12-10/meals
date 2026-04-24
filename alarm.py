@@ -1,24 +1,29 @@
 import json
 import requests
-from datetime import datetime
+from datetime import datetime, timezone, timedelta
 import os
 
-TODAY = datetime.now().strftime("%Y%m%d")
-YEAR_MONTH = datetime.now().strftime("%Y-%m")
+def get_kst_now():
+    """시스템 시간과 상관없이 한국 표준시(KST) 반환"""
+    kst_timezone = timezone(timedelta(hours=9))
+    return datetime.now(kst_timezone)
+
+TODAY = get_kst_now().strftime("%Y%m%d")
+YEAR_MONTH = get_kst_now().strftime("%Y-%m")
 FILE_NALE = f'meal/{YEAR_MONTH}.json'
 
 def get_meal_type_by_time():
-    """현재 시간에 따른 급식 유형 반환"""
-    hour = datetime.now().hour
+    """한국 시간 기준으로 급식 유형 판별"""
+    now = get_kst_now()
+    hour = now.hour
     
-    # 8시 ~ 13시 미만: 중식
-    if 8 <= hour < 13:
+    print(f"현재 시간: {now.strftime('%Y-%m-%d %H:%M:%S')}")
+    
+    if 8 <= hour < 13: 
         return "중식"
-    # 13시 ~ 18시(6시) 미만: 석식
-    elif 13 <= hour < 18:
+    elif 13 <= hour < 18: 
         return "석식"
-    # 나머지 (18시 ~ 다음날 8시 미만): 조식
-    else:
+    else: 
         return "조식"
 
 def send_discord_message(webhook_url, meal):
@@ -72,9 +77,9 @@ def main():
     if webhook_url and target_meal:
         send_discord_message(webhook_url, target_meal)
     elif not target_meal:
-        print(f"오늘 {target_meal} 정보가 없습니다.")
+        print(f"오늘 {meal_type} 정보가 없습니다.")
     else:
-        print("설정된 DISCORD WEBHOOK을 찾을 수 없습니다.")
+        print("설정된 ALARM_WEBHOOK을 찾을 수 없습니다.")
 
 if __name__ == "__main__":
     main()
