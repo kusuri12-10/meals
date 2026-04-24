@@ -144,4 +144,5 @@ export function renderAll() {
   renderDateNav()
   renderCalendar()
   document.getElementById('footerGithub').innerHTML = ICONS.github
+  document.getElementById('footerDiscord').innerHTML = ICONS.discord
 }
