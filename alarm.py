@@ -1,85 +1,79 @@
+import discord
 import json
-import requests
-from datetime import datetime, timezone, timedelta
 import os
+from datetime import datetime, timezone, timedelta
 
 def get_kst_now():
-    """시스템 시간과 상관없이 한국 표준시(KST) 반환"""
-    kst_timezone = timezone(timedelta(hours=9))
-    return datetime.now(kst_timezone)
+    return datetime.now(timezone(timedelta(hours=9)))
 
-TODAY = get_kst_now().strftime("%Y%m%d")
-YEAR_MONTH = get_kst_now().strftime("%Y-%m")
-FILE_NALE = f'meal/{YEAR_MONTH}.json'
-
-def get_meal_type_by_time():
-    """한국 시간 기준으로 급식 유형 판별"""
+def get_meal_data():
     now = get_kst_now()
+    today = now.strftime("%Y%m%d")
+    year_month = now.strftime("%Y-%m")
+    
     hour = now.hour
-    
-    print(f"현재 시간: {now.strftime('%Y-%m-%d %H:%M:%S')}")
-    
-    if 8 <= hour < 13: 
-        return "중식"
-    elif 13 <= hour < 18: 
-        return "석식"
-    else: 
-        return "조식"
+    if 8 <= hour < 13: meal_type = "중식"
+    elif 13 <= hour < 18: meal_type = "석식"
+    else: meal_type = "조식"
 
-def send_discord_message(webhook_url, meal):
-    if not meal:
-        print("급식 정보가 없습니다.")
-        return
+    try:
+        file_path = f'meal/{year_month}.json'
+        with open(file_path, 'r', encoding='utf-8') as f:
+            data = json.load(f)
+        rows = data["mealServiceDietInfo"][1]["row"]
+        meal = next((r for r in rows if r['MLSV_YMD'] == today and r['MMEAL_SC_NM'] == meal_type), None)
+        return meal, meal_type
+    except Exception as e:
+        print(f"데이터 로드 에러: {e}")
+        return None, meal_type
 
-    dish_name = meal['DDISH_NM'].replace('<br/>', '\n').strip()
+client = discord.Client(intents=discord.Intents.default())
+
+@client.event
+async def on_ready():
+    print(f'✅ {client.user.name} 봇으로 로그인되었습니다.')
     
-    payload = {
-        "username": "급식 알리미",
-        "embeds": [{
-            "title": f"🍴 {meal['MMEAL_SC_NM']} ({meal['MLSV_YMD']})",
-            "description": f"**[식단 메뉴]**\n{dish_name}",
-            "color": 0x0bc2f5,
-            "fields": [
-                {"name": "🔥 칼로리", "value": meal['CAL_INFO'], "inline": True}
-            ],
-            "footer": {"text": "meals alarm"}
-        }]
-    }
+    meal, meal_type = get_meal_data()
     
-    response = requests.post(webhook_url, json=payload)
-    if response.status_code == 204:
-        print("디스코드 메시지 전송 성공!")
+    if meal:
+        dish_name = meal['DDISH_NM'].replace('<br/>', '\n').strip()
+        embed = discord.Embed(
+            title=f"🍴 오늘의 {meal['MMEAL_SC_NM']} ({meal['MLSV_YMD']})",
+            description=f"**[식단 메뉴]**\n{dish_name}",
+            color=0x0bc2f5
+        )
+        embed.add_field(name="🔥 칼로리", value=meal['CAL_INFO'], inline=True)
+        embed.set_footer(text="대덕소프트웨어마이스터고 급식 알리미")
+
+        # 검색할 키워드 리스트
+        keywords = ['급식', 'meal', '밥']
+        
+        # 봇이 참여 중인 모든 서버 순회
+        for guild in client.guilds:
+            sent_in_guild = False
+            for channel in guild.text_channels:
+                # 채널 이름에 키워드가 포함되어 있는지 확인 (소문자 변환 후 비교)
+                if any(kw in channel.name.lower() for kw in keywords):
+                    try:
+                        await channel.send(embed=embed)
+                        print(f"✅ [{guild.name}] #{channel.name} 전송 성공")
+                        sent_in_guild = True
+                        # 한 서버에서 여러 채널에 중복 전송되는 것을 막으려면 break (원치 않으면 삭제)
+                        break 
+                    except Exception as e:
+                        print(f"❌ [{guild.name}] #{channel.name} 권한 부족: {e}")
+            
+            if not sent_in_guild:
+                print(f"ℹ️ [{guild.name}] 조건에 맞는 채널을 찾지 못함")
     else:
-        print(f"전송 실패: {response.status_code}, {response.text}")
-
-def main():
-    meal_type = get_meal_type_by_time() # 현재 시간에 따른 타입 결정
+        print(f"ℹ️ 현재 시간({meal_type})에 해당하는 급식 데이터가 없습니다.")
     
-    print(f"현재 시간 기준 급식 유형: {meal_type}")
+    # 전송 완료 후 세션 종료 (GitHub Actions 종료를 위해 필수)
+    await client.close()
 
-    with open(FILE_NALE, 'r', encoding='utf-8') as f:
-        data = json.load(f)
-
-    meal_info_list = data.get("mealServiceDietInfo", [])
-    if len(meal_info_list) < 2:
-        print("데이터 형식이 올바르지 않습니다.")
-        return
-
-    rows = meal_info_list[1].get("row", [])
-    
-    # 오늘 날짜와 결정된 식사 타입이 모두 일치하는 데이터 찾기
-    target_meal = next((
-        row for row in rows 
-        if row.get("MLSV_YMD") == TODAY and row.get("MMEAL_SC_NM") == meal_type
-    ), None)
-
-    webhook_url = os.environ.get("ALARM_WEBHOOK")
-    if webhook_url and target_meal:
-        send_discord_message(webhook_url, target_meal)
-    elif not target_meal:
-        print(f"오늘 {meal_type} 정보가 없습니다.")
-    else:
-        print("설정된 ALARM_WEBHOOK을 찾을 수 없습니다.")
-
-if __name__ == "__main__":
-    main()
+# 환경 변수 실행
+token = os.environ.get("DISCORD_BOT_TOKEN")
+if token:
+    client.run(token)
+else:
+    print("❌ DISCORD_BOT_TOKEN 환경 변수가 설정되지 않았습니다.")

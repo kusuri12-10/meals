@@ -21,9 +21,12 @@ jobs:
           python-version: '3.9'
 
       - name: Install dependencies
-        run: pip install requests
+        run: |
+          python -m pip install --upgrade pip
+          pip install discord.py requests
 
       - name: Run script
         env:
-          ALARM_WEBHOOK: ${{ secrets.ALARM_WEBHOOK }}
+          DISCORD_BOT_TOKEN: ${{ secrets.DISCORD_BOT_TOKEN }}
+          TZ: Asia/Seoul
         run: python alarm.py
