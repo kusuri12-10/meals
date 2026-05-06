@@ -11,6 +11,11 @@
   --border-strong: 55, 62, 85;
   --primary: #0bc2f5;
   --secondary: #10B981;
+
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none; 
+  user-select: none;
 }
 body.light {
   --bg: 245, 247, 252;
