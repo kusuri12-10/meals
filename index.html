@@ -4,7 +4,12 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>meals</title>
-  <link rel="icon" href="/public/pavicon.svg" type="image/svg+xml">
+  <link rel="icon" href="/pavicon.svg" type="image/svg+xml">
+  <link rel="manifest" href="/manifest.json">
+  <meta name="theme-color" content="#0f0f14" id="themeMeta">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <link rel="apple-touch-icon" href="/pavicon.svg">
 
   <!-- Primary Meta -->
   <meta name="description" content="오늘의 급식 메뉴를 한눈에 확인하세요." />
@@ -58,6 +63,14 @@
       <div class="today-btn-wrap">
         <button class="today-btn" id="todayBtn" style="display:none">오늘로 이동</button>
       </div>
+    </div>
+
+    <!-- Mobile-only Meal Sliding Pill Tabs -->
+    <div class="meal-tabs" id="mealTabs" data-active="0">
+      <button class="tab-btn" data-meal="0">조식</button>
+      <button class="tab-btn" data-meal="1">중식</button>
+      <button class="tab-btn" data-meal="2">석식</button>
+      <div class="tab-indicator"></div>
     </div>
 
     <div class="meal-grid" id="mealGrid"></div>

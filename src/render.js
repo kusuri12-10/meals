@@ -2,14 +2,20 @@ import { ICONS, getMealIcon } from './icons.js'
 import { formatDate, toDateStr, isToday } from './helpers.js'
 import { getMealsForDate } from './data.js'
 import {
-  TODAY, currentDate, isLightMode, isCalendarOpen, calendarMonth,
-  setCurrentDate, setIsCalendarOpen, setCalendarMonth,
+  TODAY, currentDate, isLightMode, isCalendarOpen, calendarMonth, currentMealTab,
+  setCurrentDate, setIsCalendarOpen, setCalendarMonth, setCurrentMealTab,
 } from './state.js'
 
 export function renderThemeBtn() {
   const btn = document.getElementById('themeBtn')
   btn.innerHTML = isLightMode ? ICONS.moon : ICONS.sun
   btn.setAttribute('aria-label', isLightMode ? '다크 모드로 전환' : '라이트 모드로 전환')
+
+  // Sync PWA theme-color meta tag
+  const themeMeta = document.getElementById('themeMeta')
+  if (themeMeta) {
+    themeMeta.setAttribute('content', isLightMode ? '#f5f7fc' : '#0f0f14')
+  }
 }
 
 export function renderDateNav() {
@@ -101,7 +107,7 @@ export async function renderMeals() {
     mealTypes.forEach((type, index) => {
       const meal = meals.find(m => m.type === type)
       const card = document.createElement('article')
-      card.className = 'meal-card'
+      card.className = `meal-card${index === currentMealTab ? ' active' : ''}`
       card.style.animationDelay = `${index * 0.12}s`
 
       let bodyHtml
@@ -139,10 +145,27 @@ export async function renderMeals() {
   }, { once: true })
 }
 
+export function renderMealTabs() {
+  const tabsContainer = document.getElementById('mealTabs')
+  if (!tabsContainer) return
+
+  tabsContainer.setAttribute('data-active', currentMealTab)
+
+  const buttons = tabsContainer.querySelectorAll('.tab-btn')
+  buttons.forEach((btn, idx) => {
+    if (idx === currentMealTab) {
+      btn.classList.add('active')
+    } else {
+      btn.classList.remove('active')
+    }
+  })
+}
+
 export function renderAll() {
   renderThemeBtn()
   renderDateNav()
   renderCalendar()
+  renderMealTabs()
   document.getElementById('footerGithub').innerHTML = ICONS.github
   document.getElementById('footerDiscord').innerHTML = ICONS.discord
 }

@@ -1,0 +1,24 @@
+{
+  "name": "meals - 오늘의 급식",
+  "short_name": "meals",
+  "description": "오늘의 급식 메뉴를 한눈에 편리하게 확인하세요.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0f0f14",
+  "theme_color": "#0f0f14",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "/pavicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "/pavicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "maskable"
+    }
+  ]
+}
