@@ -3,7 +3,7 @@ import {
   TODAY, currentDate, isLightMode, isCalendarOpen, currentMealTab,
   setCurrentDate, setIsLightMode, setIsCalendarOpen, setCalendarMonth, setCurrentMealTab,
 } from './state.js'
-import { renderAll, renderMeals, renderThemeBtn, renderCalendar, renderMealTabs } from './render.js'
+import { renderAll, renderMeals, renderThemeBtn, renderCalendar, renderMealDots } from './render.js'
 
 // Register PWA Service Worker (only in production to prevent Vite ESM hot-reload caching issues)
 if ('serviceWorker' in navigator) {
@@ -27,11 +27,16 @@ if ('serviceWorker' in navigator) {
   }
 }
 
-// Function to handle switching tabs on mobile
-function setActiveMealTab(mealIndex) {
+// Function to handle switching cards on mobile with slide animations
+function setActiveMealTab(mealIndex, direction = 'next') {
   if (currentMealTab === mealIndex) return
   setCurrentMealTab(mealIndex)
-  renderMealTabs()
+  renderMealDots()
+
+  const grid = document.getElementById('mealGrid')
+  if (grid) {
+    grid.className = `meal-grid slide-${direction}`
+  }
 
   // Toggle active class on cards for fluid animation
   const cards = document.querySelectorAll('.meal-card')
@@ -44,14 +49,15 @@ function setActiveMealTab(mealIndex) {
   })
 }
 
-// Connect mobile tabs click event
-const tabsContainer = document.getElementById('mealTabs')
-if (tabsContainer) {
-  tabsContainer.addEventListener('click', (e) => {
-    const btn = e.target.closest('.tab-btn')
-    if (!btn) return
-    const mealIndex = parseInt(btn.dataset.meal, 10)
-    setActiveMealTab(mealIndex)
+// Connect mobile page dots click event
+const dotsContainer = document.getElementById('mealDots')
+if (dotsContainer) {
+  dotsContainer.addEventListener('click', (e) => {
+    const dot = e.target.closest('.dot')
+    if (!dot) return
+    const mealIndex = parseInt(dot.dataset.meal, 10)
+    const slideDirection = mealIndex > currentMealTab ? 'next' : 'prev'
+    setActiveMealTab(mealIndex, slideDirection)
   })
 }
 
@@ -71,11 +77,12 @@ function handleSwipe() {
   }
 }
 
-function navigateMealTab(direction) {
+function navigateMealTab(diff) {
   if (window.innerWidth >= 768) return // Only on mobile viewport
-  const newTab = currentMealTab + direction
+  const newTab = currentMealTab + diff
   if (newTab >= 0 && newTab <= 2) {
-    setActiveMealTab(newTab)
+    const slideDirection = diff > 0 ? 'next' : 'prev'
+    setActiveMealTab(newTab, slideDirection)
   }
 }
 

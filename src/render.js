@@ -145,18 +145,16 @@ export async function renderMeals() {
   }, { once: true })
 }
 
-export function renderMealTabs() {
-  const tabsContainer = document.getElementById('mealTabs')
-  if (!tabsContainer) return
+export function renderMealDots() {
+  const dotsContainer = document.getElementById('mealDots')
+  if (!dotsContainer) return
 
-  tabsContainer.setAttribute('data-active', currentMealTab)
-
-  const buttons = tabsContainer.querySelectorAll('.tab-btn')
-  buttons.forEach((btn, idx) => {
+  const dots = dotsContainer.querySelectorAll('.dot')
+  dots.forEach((dot, idx) => {
     if (idx === currentMealTab) {
-      btn.classList.add('active')
+      dot.classList.add('active')
     } else {
-      btn.classList.remove('active')
+      dot.classList.remove('active')
     }
   })
 }
@@ -165,7 +163,7 @@ export function renderAll() {
   renderThemeBtn()
   renderDateNav()
   renderCalendar()
-  renderMealTabs()
+  renderMealDots()
   document.getElementById('footerGithub').innerHTML = ICONS.github
   document.getElementById('footerDiscord').innerHTML = ICONS.discord
 }
