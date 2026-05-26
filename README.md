@@ -12,7 +12,9 @@ meals는 학교 급식 정보를 날짜별로 조회할 수 있는 Web App입니
 
 - Vanilla JS (ES Modules)
 - Vite
-- Netlify (배포)
+- Vercel (배포)
+
+> 기존에 netlify로 배포했었으나 현재는 vercel로 변경되었습니다.
 
 ## 로컬 실행
 
@@ -38,7 +40,7 @@ python main.py
 
 실행 시 `last.txt`에 기록된 마지막 월을 기준으로 다음 달 데이터를 가져옵니다. `last.txt`가 없으면 현재 월을 기준으로 자동 복구합니다.
 
-## discord 봇 초대 링크
+## ~~discord 봇 초대 링크~~
 
 [meals bot](https://discord.com/oauth2/authorize?client_id=1497072615712493589&permissions=19456&integration_type=0&scope=bot)
 
@@ -51,6 +53,8 @@ python main.py
 - 오후 11시 11분
 
 알림 발송은 github actions의 작업 스케줄러인 cron을 이용하기 때문에 시간 오차가 발생할 수 있습니다.
+
+> 현재 해당 봇은 github actions의 너무 큰 시간 오차 이슈로 인해 비활성화되었습니다.
 
 ## 서비스 피드백 남기기
 
