@@ -83,7 +83,27 @@ function navigateMealTab(diff) {
   if (newTab >= 0 && newTab <= 2) {
     const slideDirection = diff > 0 ? 'next' : 'prev'
     setActiveMealTab(newTab, slideDirection)
+    return
   }
+
+  // Move to the adjacent day when swiping past the first or last meal.
+  if (diff > 0 && currentMealTab === 2) {
+    const nextDate = new Date(currentDate)
+    nextDate.setDate(nextDate.getDate() + 1)
+    setCurrentDate(nextDate)
+    setCurrentMealTab(0)
+  } else if (diff < 0 && currentMealTab === 0) {
+    const previousDate = new Date(currentDate)
+    previousDate.setDate(previousDate.getDate() - 1)
+    setCurrentDate(previousDate)
+    setCurrentMealTab(2)
+  } else {
+    return
+  }
+
+  setIsCalendarOpen(false)
+  renderAll()
+  renderMeals()
 }
 
 const mealGrid = document.getElementById('mealGrid')
