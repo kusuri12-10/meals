@@ -671,3 +671,47 @@ footer {
     opacity: 1;
   }
 }
+
+.install-dialog {
+  width: min(22rem, calc(100% - 2rem));
+  margin: auto;
+  padding: 1.5rem;
+  border: 1px solid rgb(var(--border-strong));
+  border-radius: 1rem;
+  background: rgb(var(--card));
+  color: rgb(var(--text));
+  box-shadow: 0 25px 50px rgba(0, 0, 0, 0.45);
+}
+
+.install-dialog::backdrop {
+  background: rgba(0, 0, 0, 0.55);
+}
+
+.install-dialog h2 {
+  margin-bottom: 0.5rem;
+  font-size: 1.2rem;
+}
+
+.install-dialog p {
+  color: rgb(var(--text-secondary));
+  line-height: 1.5;
+}
+
+.install-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.5rem;
+  margin-top: 1.5rem;
+}
+
+.install-actions button {
+  padding: 0.6rem 1rem;
+  border-radius: 0.6rem;
+  color: rgb(var(--text-secondary));
+}
+
+.install-actions .install-btn {
+  background: var(--primary);
+  color: #fff;
+  font-weight: 700;
+}

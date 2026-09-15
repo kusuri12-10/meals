@@ -5,6 +5,33 @@ import {
 } from './state.js'
 import { renderAll, renderMeals, renderThemeBtn, renderCalendar, renderMealDots } from './render.js'
 
+const colorScheme = matchMedia('(prefers-color-scheme: light)')
+
+function applyTheme(isLight) {
+  setIsLightMode(isLight)
+  document.body.classList.toggle('light', isLight)
+  renderThemeBtn()
+}
+
+colorScheme.addEventListener('change', (event) => applyTheme(event.matches))
+
+const installDialog = document.getElementById('installDialog')
+let installPrompt
+
+window.addEventListener('beforeinstallprompt', (event) => {
+  event.preventDefault()
+  installPrompt = event
+  installDialog.showModal()
+})
+
+document.getElementById('installBtn').addEventListener('click', async () => {
+  installDialog.close()
+  await installPrompt.prompt()
+  installPrompt = null
+})
+
+document.getElementById('installCancelBtn').addEventListener('click', () => installDialog.close())
+
 // Register PWA Service Worker (only in production to prevent Vite ESM hot-reload caching issues)
 if ('serviceWorker' in navigator) {
   if (import.meta.env.DEV) {
@@ -120,9 +147,7 @@ if (mealGrid) {
 
 // Global Event Listeners
 document.getElementById('themeBtn').addEventListener('click', () => {
-  setIsLightMode(!isLightMode)
-  document.body.classList.toggle('light', isLightMode)
-  renderThemeBtn()
+  applyTheme(!isLightMode)
 })
 
 document.getElementById('prevBtn').addEventListener('click', () => {
@@ -168,6 +193,6 @@ document.addEventListener('mousedown', e => {
 })
 
 // Initialize Application
-document.body.classList.add('light')
+document.body.classList.toggle('light', isLightMode)
 renderAll()
 renderMeals()

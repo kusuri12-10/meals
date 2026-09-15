@@ -1,6 +1,6 @@
 export const TODAY = new Date()
 export let currentDate = new Date(TODAY)
-export let isLightMode = true
+export let isLightMode = matchMedia('(prefers-color-scheme: light)').matches
 export let isCalendarOpen = false
 export let calendarMonth = new Date(TODAY.getFullYear(), TODAY.getMonth(), 1)
 
